@@ -7,6 +7,9 @@ class User:
         self.password = hash(password)
         self.age = age
 
+    def __str__(self):
+        return self.nickname
+
 
 class Video:
     def __init__(self, title, duration, time_now=0, adult_mode=False):
@@ -20,53 +23,59 @@ class Video:
 
 
 class UrTube:
-    video = []
-    users = []
 
     def __init__(self):
-        self.users = self.users
-        self.videos = self.video
+        self.users = []
+        self.videos = []
         self.current_user = None
 
-    '''
-    def log_in(self, nickname, password):
 
-        pass
-    '''
+    def log_in(self, nickname, password):
+        for user_log_in in self.users:
+            if nickname == str(user_log_in) and hash(password) == user_log_in.password:
+                self.current_user = nickname
+
 
     def register(self, nickname, password, age):
-        if nickname not in self.users:
-            User(nickname, password, age)
+        if nickname not in map(str, self.users):
+            new_user = User(nickname, password, age)
+            self.users.append(new_user)
             self.current_user = nickname
         else:
             print(f'Пользователь {nickname} уже существует')
 
-    '''
     def log_out(self):
         self.current_user = None
 
-    '''
-
     def add(self, *args):
         for item in args:
-            if item not in self.video:
-                self.video.append(item)
+            if item not in self.videos:
+                self.videos.append(item)
 
     def get_videos(self, str_find):
         find_video = []
-        for item in self.video:
-            if str(str_find).lower() in str(item).lower():
+        for item in self.videos:
+            if str(str_find).lower() in str(item).lower():  # Ищем видео
                 find_video.append(str(item))
         return find_video
 
     def watch_video(self, title_play_video):
-        if title_play_video.lower() in map(str.lower, map(str, self.video)):  # Ищем видео по названию
-            i = 0
-            while i < 5:  # "Включаем" видео. Вместо i < 5 должны быть атрибуты time_now < duration из экземпляра класса Video
-                i += 1
-                sleep(1)
-                print(i)
-            print("Конец видео")
+        if self.current_user is not None:
+            for name_current_user in self.users:
+                if name_current_user.nickname == self.current_user:
+                    for vid in self.videos:
+                        if title_play_video.lower() == vid.title.lower():
+                            if vid.adult_mode is True and name_current_user.age < 18:
+                                print("Вам нет 18 лет, пожалуйста покиньте страницу")
+                            else:
+                                while vid.time_now < vid.duration:
+                                    vid.time_now += 1
+                                    sleep(1)
+                                    print(vid.time_now)
+                                print("Конец видео")
+                                vid.time_now = 0
+        else:
+            print("Войдите в аккаунт, чтобы смотреть видео")
 
 
 ur = UrTube()
@@ -79,7 +88,7 @@ ur.add(v1, v2)
 # Проверка поиска
 print(ur.get_videos('лучший'))
 print(ur.get_videos('ПРОГ'))
-'''
+
 # Проверка на вход пользователя и возрастное ограничение
 ur.watch_video('Для чего девушкам парень программист?')
 ur.register('vasya_pupkin', 'lolkekcheburek', 13)
@@ -93,4 +102,4 @@ print(ur.current_user)
 
 # Попытка воспроизведения несуществующего видео
 ur.watch_video('Лучший язык программирования 2024 года!')
-'''
+
